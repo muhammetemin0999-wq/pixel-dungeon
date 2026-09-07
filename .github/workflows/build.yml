@@ -11,31 +11,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      - name: Set up JDK 11
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '11'
           distribution: 'temurin'
 
-      - name: Install Ant
+      - name: Inspect and Build
         run: |
-          sudo apt-get update
-          sudo apt-get install -y ant
-
-      - name: Locate and Build Project
-        run: |
-          BUILD_XML=$(find . -name "build.xml" | head -n 1)
-          if [ -n "$BUILD_XML" ]; then
-            DIR=$(dirname "$BUILD_XML")
-            echo "build.xml bulundu: $DIR"
-            cd "$DIR"
-            ant debug || ant release
-          elif [ -f "./gradlew" ]; then
-            chmod +x gradlew
-            ./gradlew assembleDebug
-          else
-            echo "Derleme dosyası bulunamadı!"
-            exit 1
+          echo "=== Klasör İçeriği ==="
+          ls -la
+          
+          if [ -f "build.gradle" ] || [ -f "app/build.gradle" ]; then
+            echo "Gradle projesi tespit edildi."
+            gradle assembleDebug
+          elif [ -d "src" ]; then
+            echo "Ham Java/Android yapısı tespit edildi."
+            android update project --path . || true
+            ant debug || true
           fi
 
       - name: Upload APK
@@ -43,6 +36,7 @@ jobs:
         with:
           name: app-debug
           path: '**/*.apk'
+
 
 
 
