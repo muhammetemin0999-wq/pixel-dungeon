@@ -11,20 +11,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up JDK 11
+      - name: Set up JDK 8
         uses: actions/setup-java@v4
         with:
-          java-version: '11'
+          java-version: '8'
           distribution: 'temurin'
 
-      - name: Find and Build Project
+      - name: Setup Android SDK Tools
+        uses: android-actions/setup-android@v3
+
+      - name: Build APK with Ant
         run: |
-          find . -maxdepth 3 -name "build.xml" -execdir ant debug \; || true
-          find . -maxdepth 3 -name "gradlew" -execdir chmod +x gradlew \; -execdir ./gradlew assembleDebug \; || true
+          sdkmanager "platforms;android-19" "build-tools;28.0.3"
+          android update project --path . --target android-19 || true
+          ant debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: app-debug
           path: '**/*.apk'
+
 
