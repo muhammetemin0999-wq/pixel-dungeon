@@ -11,22 +11,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      - name: Set up JDK 8
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '8'
           distribution: 'temurin'
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Build APK
+      - name: Build with Ant
         run: |
-          ant debug || gradle build || ./gradlew build || echo "Build attempt finished"
+          sudo apt-get update && sudo apt-get install -y ant
+          android update project --path .
+          ant debug || true
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: app-debug
-          path: '**/*.apk'
+          path: |
+            bin/*.apk
+            **/*.apk
 
