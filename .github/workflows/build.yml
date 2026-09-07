@@ -17,19 +17,21 @@ jobs:
           java-version: '8'
           distribution: 'temurin'
 
-      - name: Setup Android SDK Tools
-        uses: android-actions/setup-android@v3
+      - name: Install Build Tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ant android-sdk
 
       - name: Build APK with Ant
         run: |
-          sdkmanager "platforms;android-19" "build-tools;28.0.3"
-          android update project --path . --target android-19 || true
-          ant debug
+          ant debug || ant release
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: app-debug
-          path: '**/*.apk'
+          path: |
+            bin/*.apk
+            **/*.apk
 
 
